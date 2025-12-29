@@ -9,6 +9,36 @@ Queue* create_queue() {
     return p;
 }
 
+
+void enqueue(Queue *q, int value) {
+    Elem *new_elem = (Elem*)malloc(sizeof(Elem));
+    new_elem->inf = value;
+    new_elem->link = NULL;
+    
+    if (q->EndQ == NULL) {
+        q->BegQ = q->EndQ = new_elem;
+    } else {
+        q->EndQ->link = new_elem;
+        q->EndQ = new_elem;
+    }
+    q->size++;
+}
+
+int dequeue(Queue *q) {
+    if (q->BegQ == NULL) return -1;
+    
+    Elem *temp = q->BegQ;
+    int value = temp->inf;
+    q->BegQ = q->BegQ->link;
+    
+    if (q->BegQ == NULL) {
+        q->EndQ = NULL;
+    }
+    
+    free(temp);
+    q->size--;
+    return value;
+}
 void add_elem_queue(Queue* p, int value) {
     Elem* new_elem = (Elem*)malloc(sizeof(Elem));
     new_elem->inf = value;

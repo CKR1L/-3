@@ -18,24 +18,51 @@ void write_array_to_file(int arr[], int size, const char* filename) {
     fclose(file);
 }
 
-int* read_array_from_file(const char* filename, int* size) {
-    FILE* file = fopen(filename, "r");
+void save_last_queue(int arr[], int size) {
+    FILE* file = fopen("last_queue.txt", "w");  
     if (file == NULL) {
-        printf("Ошибка открытия файла: %s\n", filename);
-        *size = 0;
+        return;  
+    }
+    
+    fprintf(file, "%d\n", size);  
+    
+    for (int i = 0; i < size; i++) {
+        fprintf(file, "%d\n", arr[i]);
+    }
+    
+    fclose(file);
+}
+
+int* load_last_queue(int* size) {
+    FILE* file = fopen("last_queue.txt", "r");
+    if (file == NULL) {
+        return NULL;  
+    }
+    
+    // Читаем размер
+    if (fscanf(file, "%d", size) != 1) {
+        fclose(file);
         return NULL;
     }
-    int capacity = 100;
-    int* arr = (int*)malloc(capacity * sizeof(int));
-    *size = 0;
-    int num;
-    while (fscanf(file, "%d", &num) == 1) {
-        if (*size >= capacity) {
-            capacity *= 2;
-            arr = (int*)realloc(arr, capacity * sizeof(int));
-        }
-        arr[(*size)++] = num;
+    
+    if (*size <= 0 || *size > 1000000) {  
+        fclose(file);
+        return NULL;
     }
+    
+    int* arr = (int*)malloc(*size * sizeof(int));
+    if (arr == NULL) {
+        fclose(file);
+        return NULL;
+    }
+    for (int i = 0; i < *size; i++) {
+        if (fscanf(file, "%d", &arr[i]) != 1) {
+            free(arr);
+            fclose(file);
+            return NULL;
+        }
+    }
+    
     fclose(file);
     return arr;
 }

@@ -1,3 +1,4 @@
+// main.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,8 +30,7 @@ int* input_array_dynamic(int* size) {
             line[i] != ' ' && 
             line[i] != '\t' && 
             line[i] != '+' && 
-            line[i] != '-' &&
-            line[i] != '\0') {
+            line[i] != '-') {
             
             if ((line[i] == '+' || line[i] == '-') && 
                 i + 1 < strlen(line) && 
@@ -87,8 +87,7 @@ int* input_array_dynamic(int* size) {
                 }
                 
                 if (chars_read < expected_chars) {
-                    printf("Ошибка: обнаружен недопустимый символ в числе\n", 
-                           (ptr - line) + chars_read + 1);
+                    printf("Ошибка: обнаружен недопустимый символ в числе\n");
                     free(arr);
                     return NULL;
                 }
@@ -143,9 +142,9 @@ void print_time(double time_ms, const char* sort_name) {
 
 void show_menu() {
     printf("\n=======================================================\n");
-    printf("                МЕНЮ ПРОГРАММЫ СОРТИРОВКИ                \n");
+    printf("        МЕНЮ ПРОГРАММЫ СОРТИРОВКИ ОЧЕРЕДЕЙ              \n");
     printf("=========================================================\n");
-    printf("1. Ввести массив вручную и отсортировать\n");
+    printf("1. Ввести массив вручную и отсортировать как очередь\n");
     printf("2. Запустить тестирование на тестовых файлах\n");
     printf("3. Выйти из программы\n");
     printf("\nВыберите действие (1-3): ");
@@ -170,14 +169,10 @@ void show_graph() {
     }
     fclose(graph_script);
     
-    printf(" Запускаю Python-скрипт для построения графика...\n");
-    printf("  (Откроется новое окно с графиком)\n\n");
-    
     int result = system("python3 graph.py");
     
     if (result == 0) {
         printf("\n График успешно построен и сохранен как graph.png\n");
-        printf("  Результаты также сохранены в файле results.txt\n");
     } else {
         printf("\n Не удалось построить график.\n");
         printf("  Убедитесь, что установлен Python и библиотека matplotlib.\n");
@@ -189,7 +184,7 @@ int main() {
     int choice;
     
     printf("==========================================================\n");
-    printf("                ПРОГРАММА СОРТИРОВКИ МАССИВОВ             \n");
+    printf("        ПРОГРАММА СОРТИРОВКИ ОЧЕРЕДЕЙ                      \n");
     printf("==========================================================\n");
     
     while (1) {
@@ -205,7 +200,7 @@ int main() {
         
         if (choice == 1) {
             printf("\n========================================================\n");
-            printf("               РЕЖИМ 1: РУЧНОЙ ВВОД МАССИВА              \n");
+            printf("     РЕЖИМ 1: РУЧНОЙ ВВОД И СОРТИРОВКА ОЧЕРЕДИ          \n");
             printf("=========================================================\n");
             
             int size;
@@ -224,39 +219,28 @@ int main() {
             print_queue(p);
             printf("\n");
             
-            int* arr_selection = (int*)malloc(size * sizeof(int));
-            int* arr_quick = (int*)malloc(size * sizeof(int));
-            
-            if (arr_selection == NULL || arr_quick == NULL) {
-                printf("Ошибка выделения памяти!\n");
-                free(arr);
-                if (arr_selection) free(arr_selection);
-                if (arr_quick) free(arr_quick);
-                free_queue(p);
-                continue;
-            }
-            
-            memcpy(arr_selection, arr, size * sizeof(int));
-            memcpy(arr_quick, arr, size * sizeof(int));
+            // Создаем копии очереди для сортировки
+            Queue* queue_selection = array_to_queue(arr, size);
+            Queue* queue_quick = array_to_queue(arr, size);
             
             clock_t start = clock();
-            selection_sort(arr_selection, size);
+            queue_selection_sort(queue_selection);
             clock_t end = clock();
             double selection_time = ((double)(end - start)) * 1000 / CLOCKS_PER_SEC;
             
             start = clock();
-            quick_sort(arr_quick, 0, size - 1);
+            queue_quick_sort(queue_quick);
             end = clock();
             double quick_time = ((double)(end - start)) * 1000 / CLOCKS_PER_SEC;
             
             printf("==========================================\n");
-            printf("   РЕЗУЛЬТАТЫ СОРТИРОВКИ:\n");
+            printf("   РЕЗУЛЬТАТЫ СОРТИРОВКИ ОЧЕРЕДЕЙ:\n");
             printf("==========================================\n");
             
             printf("\n   ВРЕМЯ ВЫПОЛНЕНИЯ:\n");
             printf("------------------------------------\n");
-            print_time(selection_time, "Сортировка выбором");
-            print_time(quick_time, "Быстрая сортировка");
+            print_time(selection_time, "Сортировка выбором (очередь)");
+            print_time(quick_time, "Быстрая сортировка (очередь)");
             
             if (selection_time > 0 && quick_time > 0) {
                 double speedup = selection_time / quick_time;
@@ -264,60 +248,77 @@ int main() {
                 printf("  Быстрая сортировка быстрее в %.2f раз\n", speedup);
             }
             
-            printf("\n  ОТСОРТИРОВАННЫЕ МАССИВЫ:\n");
+            // Преобразуем отсортированные очереди обратно в массивы для отображения
+            int size1, size2;
+            int* arr_selection = queue_to_array(queue_selection, &size1);
+            int* arr_quick = queue_to_array(queue_quick, &size2);
+            
+            printf("\n  ОТСОРТИРОВАННЫЕ ДАННЫЕ:\n");
             printf("--------------------------\n");
-            printf("Сортировка выбором:   ");
-            print_array(arr_selection, size);
+            printf("Сортировка выбором (очередь):   ");
+            print_array(arr_selection, size1);
             
-            printf("Быстрая сортировка:   ");
-            print_array(arr_quick, size);
+            printf("Быстрая сортировка (очередь):   ");
+            print_array(arr_quick, size2);
             
-            int correct = 1;
-            for (int i = 0; i < size - 1; i++) {
+            // Проверка корректности сортировки
+            int correct_selection = 1;
+            int correct_quick = 1;
+            
+            for (int i = 0; i < size1 - 1; i++) {
                 if (arr_selection[i] > arr_selection[i + 1]) {
-                    correct = 0;
+                    correct_selection = 0;
+                    break;
+                }
+            }
+            
+            for (int i = 0; i < size2 - 1; i++) {
+                if (arr_quick[i] > arr_quick[i + 1]) {
+                    correct_quick = 0;
                     break;
                 }
             }
             
             printf("\n ");
-            if (correct) {
-                printf("Массивы отсортированы корректно (проверено)");
+            if (correct_selection && correct_quick) {
+                printf("Обе очереди отсортированы корректно");
             } else {
                 printf("Обнаружена ошибка в сортировке!");
+                if (!correct_selection) printf(" (выбором)");
+                if (!correct_quick) printf(" (быстрая)");
             }
             printf("\n");
             
+            // Сохраняем результаты в файлы
             write_array_to_file(arr, size, "orig.txt");
-            write_array_to_file(arr_selection, size, "sorted_selection.txt");
-            write_array_to_file(arr_quick, size, "sorted_quick.txt");
+            write_array_to_file(arr_selection, size1, "sorted_queue_selection.txt");
+            write_array_to_file(arr_quick, size2, "sorted_queue_quick.txt");
             
             printf("\n  ФАЙЛЫ СОХРАНЕНЫ:\n");
             printf("---------------------------------------\n");
             printf("  - Исходный массив:           orig.txt\n");
-            printf("  - Сортировка выбором:        sorted_selection.txt\n");
-            printf("  - Быстрая сортировка:        sorted_quick.txt\n");
+            printf("  - Очередь (сорт. выбором):   sorted_queue_selection.txt\n");
+            printf("  - Очередь (быстрая сорт.):   sorted_queue_quick.txt\n");
             
+            // Очистка памяти
             free(arr);
             free(arr_selection);
             free(arr_quick);
             free_queue(p);
+            free_queue(queue_selection);
+            free_queue(queue_quick);
             
             printf("\nНажмите Enter для возврата в меню...");
             getchar();
             
         } else if (choice == 2) {
             printf("\n========================================================\n");
-            printf("          РЕЖИМ 2: ТЕСТИРОВАНИЕ НА ТЕСТОВЫХ ФАЙЛАХ        \n");
+            printf("      РЕЖИМ 2: ТЕСТИРОВАНИЕ НА ТЕСТОВЫХ ФАЙЛАХ          \n");
             printf("==========================================================\n");
-            
             
             benchmark_sorting();
             
-            printf("\n==========================================================\n");
-            printf("          ПОКАЗАТЬ ГРАФИК РЕЗУЛЬТАТОВ?                   \n");
-            printf("==========================================================\n");
-            printf("Хотите увидеть график сравнения производительности?\n");
+            printf("\nХотите увидеть график сравнения производительности?\n");
             printf("1. Да, показать график\n");
             printf("2. Нет, вернуться в меню\n");
             printf("\nВыберите действие (1-2): ");

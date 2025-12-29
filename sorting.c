@@ -1,47 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "sorting.h"
 #include "queue.h"
-
-void selection_sort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        int min_idx = i;
-        for (int j = i + 1; j < n; j++) {
-            if (arr[j] < arr[min_idx]) {
-                min_idx = j;
-            }
-        }
-        int tmp = arr[min_idx];
-        arr[min_idx] = arr[i];
-        arr[i] = tmp;        
-    }
-}
-
-int partition(int arr[], int low, int high) {
-    int pivot = arr[high];
-    int i = (low - 1);
-    for (int j = low; j <= high - 1; j++) {
-        if (arr[j] < pivot) {
-            i++;
-            int tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-        }
-    }
-    int tmp = arr[i + 1];
-    arr[i + 1] = arr[high];
-    arr[high] = tmp;
-    return (i + 1);
-}
-
-void quick_sort(int arr[], int low, int high) {
-    if (low < high) {
-        int pi = partition(arr, low, high);
-        quick_sort(arr, low, pi - 1);
-        quick_sort(arr, pi + 1, high);
-    }
-}
-
 int* queue_to_array(Queue* p, int* size) {
     *size = p->size;
     int* arr = (int*)malloc(*size * sizeof(int));
@@ -55,4 +14,81 @@ int* queue_to_array(Queue* p, int* size) {
         current = current->link;
     }
     return arr;
+}
+Elem* find_min_prev(Queue* p, Elem* start) {
+    Elem *min_prev = NULL;
+    Elem *current = start;
+    int min_value = current->inf;
+
+    while (current->link != NULL) {
+        if (current->link->inf < min_value) {
+            min_value = current->link->inf;
+            min_prev = current;
+        }
+        current = current->link;
+    }
+    return min_prev;
+}
+
+void queue_selection_sort(Queue* p) {
+    if (p->size <= 1) return;
+    Elem dummy;
+    dummy.link = p->BegQ;
+    p->BegQ = &dummy;
+
+    Elem *sorted_tail = &dummy;
+
+    while (sorted_tail->link != NULL) {
+        Elem *min_prev = find_min_prev(p, sorted_tail);
+        Elem *min_node;
+        
+        if (min_prev == NULL) {
+            min_node = sorted_tail->link;
+            sorted_tail = sorted_tail->link;
+        } else {
+            min_node = min_prev->link;
+            min_prev->link = min_node->link;
+            
+            min_node->link = sorted_tail->link;
+            sorted_tail->link = min_node;
+            sorted_tail = min_node;
+        }
+    }
+
+    p->BegQ = dummy.link;   
+    Elem *current = p->BegQ;
+    while (current->link != NULL) {
+        current = current->link;
+    }
+    p->EndQ = current;
+}
+
+void queue_quick_sort(Queue* p) {
+    if (p->size <= 1) return;
+    int pivot = p->BegQ->inf;
+    Queue less = {NULL, NULL, 0};
+    Queue equal = {NULL, NULL, 0};
+    Queue greater = {NULL, NULL, 0};
+    while (p->size > 0) {
+        int value = dequeue(p);
+        if (value < pivot) {
+            enqueue(&less, value);
+        } else if (value == pivot) {
+            enqueue(&equal, value);
+        } else {
+            enqueue(&greater, value);
+        }
+    }    
+    queue_quick_sort(&less);
+    queue_quick_sort(&greater);
+
+    while (less.size > 0) {
+        enqueue(p, dequeue(&less));
+    }
+    while (equal.size > 0) {
+        enqueue(p, dequeue(&equal));
+    }
+    while (greater.size > 0) {
+        enqueue(p, dequeue(&greater));
+    }
 }

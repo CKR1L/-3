@@ -16,5 +16,8 @@ int remove_elem_queue(Queue *p);
 int is_empty(Queue *p);
 void free_queue(Queue *p);
 void print_queue(Queue *p);
+void enqueue(Queue *p, int value);
+int dequeue(Queue *p);
 Queue* array_to_queue(int arr[], int size);
+
 #endif
