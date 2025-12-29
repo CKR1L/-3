@@ -84,7 +84,6 @@ int* input_array_dynamic(int* size) {
                 if (ptr[0] == '+' || ptr[0] == '-') {
                     expected_chars++;
                 }
-                
                 if (chars_read < expected_chars) {
                     printf("Ошибка: обнаружен недопустимый символ в числе\n");
                     free(arr);
