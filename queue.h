@@ -19,5 +19,6 @@ void print_queue(Queue *p);
 void enqueue(Queue *p, int value);
 int dequeue(Queue *p);
 Queue* array_to_queue(int arr[], int size);
+int* queue_to_array(Queue* p, int* size);
 
 #endif

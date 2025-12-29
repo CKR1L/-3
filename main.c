@@ -302,7 +302,8 @@ int main() {
             }
             printf("\n");
             
-            // Сохраняем результаты в файлы
+            save_last_queue(arr_quick, size2);
+            printf("  Отсортированная очередь сохранена в last_queue.txt\n");   
             write_array_to_file(arr, size, "orig.txt");
             write_array_to_file(arr_selection, size1, "sorted_queue_selection.txt");
             write_array_to_file(arr_quick, size2, "sorted_queue_quick.txt");
