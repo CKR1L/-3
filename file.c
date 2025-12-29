@@ -3,6 +3,45 @@
 #include <time.h>
 #include "file.h"
 
+int* read_array_from_file(const char* filename, int* size) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Ошибка: не удалось открыть файл %s\n", filename);
+        return NULL;
+    }
+    
+    int count = 0;
+    int temp;
+    while (fscanf(file, "%d", &temp) == 1) {
+        count++;
+    }
+    
+    if (count == 0) {
+        fclose(file);
+        return NULL;
+    }
+    
+    rewind(file);
+    
+    int* arr = (int*)malloc(count * sizeof(int));
+    if (arr == NULL) {
+        fclose(file);
+        printf("Ошибка выделения памяти\n");
+        return NULL;
+    }
+    
+    for (int i = 0; i < count; i++) {
+        if (fscanf(file, "%d", &arr[i]) != 1) {
+            free(arr);
+            fclose(file);
+            return NULL;
+        }
+    }
+    
+    fclose(file);
+    *size = count;
+    return arr;
+}
 void write_array_to_file(int arr[], int size, const char* filename) {
     FILE* file = fopen(filename, "w");
     if (file == NULL) {

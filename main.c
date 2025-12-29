@@ -1,4 +1,3 @@
-// main.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -187,6 +186,23 @@ int main() {
     printf("        ПРОГРАММА СОРТИРОВКИ ОЧЕРЕДЕЙ                      \n");
     printf("==========================================================\n");
     
+    int last_size = 0;
+    int* last_arr = load_last_queue(&last_size);
+    
+    if (last_arr != NULL && last_size > 0) {
+        printf("\n--- ПОСЛЕДНЯЯ ОТСОРТИРОВАННАЯ ОЧЕРЕДЬ ---\n");
+        printf("Размер: %d элементов\n", last_size);
+        printf("Очередь: ");
+        
+        Queue* last_queue = array_to_queue(last_arr, last_size);
+        print_queue(last_queue);
+        
+        free_queue(last_queue);
+        free(last_arr);
+        printf("-------------------------------------------\n\n");
+    } else {
+        printf("\n(Предыдущих результатов нет)\n\n");
+    }
     while (1) {
         show_menu();
         
@@ -248,7 +264,6 @@ int main() {
                 printf("  Быстрая сортировка быстрее в %.2f раз\n", speedup);
             }
             
-            // Преобразуем отсортированные очереди обратно в массивы для отображения
             int size1, size2;
             int* arr_selection = queue_to_array(queue_selection, &size1);
             int* arr_quick = queue_to_array(queue_quick, &size2);
@@ -261,7 +276,6 @@ int main() {
             printf("Быстрая сортировка (очередь):   ");
             print_array(arr_quick, size2);
             
-            // Проверка корректности сортировки
             int correct_selection = 1;
             int correct_quick = 1;
             
