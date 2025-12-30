@@ -78,7 +78,6 @@ int* load_last_queue(int* size) {
         return NULL;  
     }
     
-    // Читаем размер
     if (fscanf(file, "%d", size) != 1) {
         fclose(file);
         return NULL;

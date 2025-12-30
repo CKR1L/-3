@@ -16,17 +16,18 @@ int* queue_to_array(Queue* p, int* size) {
     return arr;
 }
 Elem* find_min_prev(Queue* p, Elem* start) {
-    Elem *min_prev = NULL;
-    Elem *current = start;
-    int min_value = current->inf;
-
+    if (start == NULL || start->link == NULL) return NULL;
+    
+    Elem* min_prev = start;
+    Elem* current = start->link;
+    
     while (current->link != NULL) {
-        if (current->link->inf < min_value) {
-            min_value = current->link->inf;
+        if (current->link->inf < min_prev->link->inf) {
             min_prev = current;
         }
         current = current->link;
     }
+    
     return min_prev;
 }
 

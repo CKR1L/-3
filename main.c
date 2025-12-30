@@ -158,6 +158,7 @@ void show_graph() {
         return;
     }
     fclose(results_file);
+
     
     FILE* graph_script = fopen("graph.py", "r");
     if (graph_script == NULL) {
@@ -177,8 +178,36 @@ void show_graph() {
         printf("  Для установки matplotlib выполните: pip install matplotlib\n");
     }
 }
-
-int main() {
+void show_last_results(){
+    printf("ПРЕДЫДУЩАЯ ОЧЕРЕДЬ\n");
+    int orig_size;
+    int* orig_arr = read_array_from_file("orig.txt", &orig_size);
+    if (orig_arr != NULL && orig_size > 0) {
+        printf("Размер: %d элементов\n", orig_size);
+        printf("Массив: ");
+        print_array(orig_arr, orig_size);
+        free(orig_arr);
+    } else {
+        printf("\nФайл sorted_queue_selection.txt не найден.\n");
+    }
+    int sel_size;
+    int* sel_arr = read_array_from_file("sorted_queue_selection.txt", &sel_size);
+    
+    if (sel_arr != NULL && sel_size > 0) {
+        printf("\n--- ОТСОРТИРОВАНО ВЫБОРОМ (из sorted_queue_selection.txt) ---\n");
+        printf("Размер: %d элементов\n", sel_size);
+        printf("Массив: ");
+        print_array(sel_arr, sel_size);
+        free(sel_arr);
+    } else {
+        printf("\nФайл sorted_queue_selection.txt не найден.\n");
+    }
+}
+int main(int argc, char* argv[]) {
+    if (argc > 1 && strcmp(argv[1], "--file") == 0) {
+        show_last_results();
+        return 0;
+    }
     int choice;
     
     printf("==========================================================\n");
@@ -234,7 +263,6 @@ int main() {
             print_queue(p);
             printf("\n");
             
-            // Создаем копии очереди для сортировки
             Queue* queue_selection = array_to_queue(arr, size);
             Queue* queue_quick = array_to_queue(arr, size);
             
@@ -314,7 +342,6 @@ int main() {
             printf("  - Очередь (сорт. выбором):   sorted_queue_selection.txt\n");
             printf("  - Очередь (быстрая сорт.):   sorted_queue_quick.txt\n");
             
-            // Очистка памяти
             free(arr);
             free(arr_selection);
             free(arr_quick);
