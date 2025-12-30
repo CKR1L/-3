@@ -1,9 +1,13 @@
 TARGET = ./a.out
 FILES = main.o queue.o sorting.o file.o benchmark.o
+compile: *.c
+	gcc main.c benchmark.c sorting.c queue.c file.c -g -o main
 .PHONY: all clean install unistall
 all: $(TARGET)
-run: 
-	./$(TARGET)
+run: compile 
+	./main
+run-file: compile
+	./main --file
 main.o: main.c
 	gcc -c -o main.o main.c
 queue.o: queue.c
